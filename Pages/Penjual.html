@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vexel Gameshop - Panel Penjual</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#b7e7f3] text-slate-800 min-h-screen">
+
+  <nav class="bg-[#008bd0] p-4 sticky top-0 z-50 shadow-md">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <img src="2.png" alt="Vexel Logo" class="h-9 w-auto rounded-lg">
+        <h1 class="text-xl font-bold text-[#f5ebe6]">Vexel <span class="text-xs text-yellow-200 font-normal">Panel Penjual</span></h1>
+      </div>
+      <a href="index.html" class="text-xs bg-white/20 hover:bg-white/30 px-3.5 py-2 rounded-xl text-white font-semibold backdrop-blur-sm transition flex items-center gap-1.5">
+        ← Kembali ke Toko Utama
+      </a>
+    </div>
+  </nav>
+
+  <main class="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/90 backdrop-blur-md p-6 rounded-2xl border border-sky-200 shadow-md">
+      <div>
+        <h2 class="text-lg font-bold text-slate-800">Halo, <span class="text-[#008bd0]">ProTrader_99</span>! 👋</h2>
+        <p class="text-xs text-slate-500 mt-0.5">Kelola barang dagangan dan ketersediaan opsi bukti transaksi tokomu.</p>
+      </div>
+      <button onclick="openFormModal()" class="bg-[#008bd0] hover:bg-[#0073ad] text-white font-bold px-4 py-2 rounded-xl text-sm transition shadow-md w-full sm:w-auto">
+        + Tambah Barang Baru
+      </button>
+    </div>
+
+    <div class="bg-white/90 backdrop-blur-md rounded-2xl border border-sky-200 overflow-hidden shadow-md">
+      <div class="p-4 border-b border-sky-100 flex justify-between items-center">
+        <h3 class="font-bold text-[#008bd0]">Daftar Item Dagangan</h3>
+        <span class="text-xs text-slate-500" id="itemCount">Total: 3 Item</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm text-slate-700">
+          <thead class="bg-sky-50/80 text-xs text-slate-500 uppercase border-b border-sky-200">
+            <tr>
+              <th class="p-4">Item & Game</th>
+              <th class="p-4">Harga</th>
+              <th class="p-4">Stok</th>
+              <th class="p-4">Min. Beli</th>
+              <th class="p-4">Opsi Bukti (5%)</th>
+              <th class="p-4 text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="sellerTableBody" class="divide-y divide-sky-100"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <div id="productModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
+    <div class="bg-white rounded-2xl border border-sky-200 max-w-lg w-full p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-sky-100 pb-3">
+        <h3 class="text-lg font-bold text-[#008bd0]" id="modalTitle">Tambah Item Baru</h3>
+        <button onclick="closeFormModal()" class="text-slate-400 hover:text-slate-600 font-bold text-xl">&times;</button>
+      </div>
+      
+      <form onsubmit="saveItem(event)" class="space-y-4 text-sm">
+        <input type="hidden" id="editId">
+        
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs text-slate-600 mb-1">Nama Game</label>
+            <input type="text" id="inputGame" required class="w-full px-3 py-2 border border-sky-300 rounded-xl focus:ring-2 focus:ring-[#008bd0] outline-none">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-600 mb-1">Kategori</label>
+            <select id="inputCategory" class="w-full px-3 py-2 border border-sky-300 rounded-xl focus:ring-2 focus:ring-[#008bd0] outline-none">
+              <option value="Skin">Skin / Cosmetic</option>
+              <option value="Weapon">Weapon / Equipment</option>
+              <option value="Currency">In-Game Currency</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs text-slate-600 mb-1">Nama Item</label>
+          <input type="text" id="inputName" required class="w-full px-3 py-2 border border-sky-300 rounded-xl focus:ring-2 focus:ring-[#008bd0] outline-none">
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs text-slate-600 mb-1">Harga (Rp)</label>
+            <input type="number" id="inputPrice" required min="1000" class="w-full px-3 py-2 border border-sky-300 rounded-xl focus:ring-2 focus:ring-[#008bd0] outline-none">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-600 mb-1">Stok</label>
+            <input type="number" id="inputStock" required min="1" class="w-full px-3 py-2 border border-sky-300 rounded-xl focus:ring-2 focus:ring-[#008bd0] outline-none">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-600 mb-1">Min. Beli</label>
+            <input type="number" id="inputMin" required min="1" class="w-full px-3 py-2 border border-sky-300 rounded-xl focus:ring-2 focus:ring-[#008bd0] outline-none">
+          </div>
+        </div>
+
+        <div class="bg-sky-50 p-3 rounded-xl border border-sky-200 flex justify-between items-center">
+          <div>
+            <p class="font-medium text-slate-700">Sediakan Layanan Bukti (Foto/Video)?</p>
+            <p class="text-[11px] text-slate-500">Pembeli dapat memilih opsi +5% biaya saat checkout.</p>
+          </div>
+          <input type="checkbox" id="inputProof" class="w-5 h-5 accent-[#008bd0] rounded cursor-pointer">
+        </div>
+
+        <div>
+          <label class="block text-xs text-slate-600 mb-1">Deskripsi Trade</label>
+          <textarea id="inputDesc" rows="3" class="w-full px-3 py-2 border border-sky-300 rounded-xl focus:ring-2 focus:ring-[#008bd0] outline-none"></textarea>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2 border-t border-sky-100">
+          <button type="button" onclick="closeFormModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-600 font-medium">Batal</button>
+          <button type="submit" class="px-4 py-2 bg-[#008bd0] hover:bg-[#0073ad] font-bold rounded-xl text-white">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let myProducts = [
+      { id: 1, name: "Awakened Divine Orb", game: "Path of Exile", category: "Currency", price: 8500, stock: 250, minBuy: 10, providesProof: true },
+      { id: 2, name: "AK-47 | Redline (FT)", game: "CS:GO / CS2", category: "Weapon", price: 210000, stock: 5, minBuy: 1, providesProof: true },
+      { id: 3, name: "Dragonclaw Hook", game: "Dota 2", category: "Skin", price: 2450000, stock: 2, minBuy: 1, providesProof: false }
+    ];
+
+    function renderTable() {
+      const tbody = document.getElementById('sellerTableBody');
+      tbody.innerHTML = '';
+
+      myProducts.forEach(item => {
+        tbody.innerHTML += `
+          <tr class="hover:bg-sky-50/50">
+            <td class="p-4">
+              <p class="font-bold text-slate-800">${item.name}</p>
+              <span class="text-xs text-[#008bd0]">${item.game}</span> • <span class="text-[10px] text-slate-500">${item.category}</span>
+            </td>
+            <td class="p-4 font-semibold text-slate-800">Rp ${item.price.toLocaleString('id-ID')}</td>
+            <td class="p-4">${item.stock} Unit</td>
+            <td class="p-4">${item.minBuy} Unit</td>
+            <td class="p-4">
+              ${item.providesProof 
+                ? '<span class="text-xs bg-emerald-100 text-emerald-800 border border-emerald-300 px-2.5 py-0.5 rounded-full font-medium">Tersedia (+5%)</span>' 
+                : '<span class="text-xs bg-slate-100 text-slate-500 px-2.5 py-0.5 rounded-full">Tidak Aktif</span>'}
+            </td>
+            <td class="p-4 text-center space-x-2">
+              <button onclick="editItem(${item.id})" class="text-xs bg-amber-500 hover:bg-amber-600 px-2.5 py-1 rounded-lg text-white font-medium">Edit</button>
+              <button onclick="deleteItem(${item.id})" class="text-xs bg-rose-500 hover:bg-rose-600 px-2.5 py-1 rounded-lg text-white font-medium">Hapus</button>
+            </td>
+          </tr>
+        `;
+      });
+
+      document.getElementById('itemCount').innerText = `Total: ${myProducts.length} Item`;
+    }
+
+    function openFormModal() { document.getElementById('productModal').classList.remove('hidden'); }
+    function closeFormModal() { document.getElementById('productModal').classList.add('hidden'); }
+
+    function saveItem(e) {
+      e.preventDefault();
+      const editId = document.getElementById('editId').value;
+      const data = {
+        id: editId ? parseInt(editId) : Date.now(),
+        name: document.getElementById('inputName').value,
+        game: document.getElementById('inputGame').value,
+        category: document.getElementById('inputCategory').value,
+        price: parseInt(document.getElementById('inputPrice').value),
+        stock: parseInt(document.getElementById('inputStock').value),
+        minBuy: parseInt(document.getElementById('inputMin').value),
+        providesProof: document.getElementById('inputProof').checked
+      };
+
+      if (editId) {
+        const idx = myProducts.findIndex(p => p.id === parseInt(editId));
+        if (idx !== -1) myProducts[idx] = data;
+      } else {
+        myProducts.push(data);
+      }
+
+      renderTable();
+      closeFormModal();
+    }
+
+    function editItem(id) {
+      const item = myProducts.find(p => p.id === id);
+      if (!item) return;
+
+      document.getElementById('editId').value = item.id;
+      document.getElementById('inputGame').value = item.game;
+      document.getElementById('inputCategory').value = item.category;
+      document.getElementById('inputName').value = item.name;
+      document.getElementById('inputPrice').value = item.price;
+      document.getElementById('inputStock').value = item.stock;
+      document.getElementById('inputMin').value = item.minBuy;
+      document.getElementById('inputProof').checked = item.providesProof;
+
+      openFormModal();
+    }
+
+    function deleteItem(id) {
+      if (confirm("Hapus item ini dari toko?")) {
+        myProducts = myProducts.filter(p => p.id !== id);
+        renderTable();
+      }
+    }
+
+    renderTable();
+  </script>
+</body>
+</html>

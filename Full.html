@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vexel Gameshop - Item Marketplace</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#b7e7f3] text-slate-800 min-h-screen">
+
+  <!-- NAVBAR UTAMA -->
+  <nav class="bg-[#008bd0] p-4 sticky top-0 z-50 shadow-md">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="flex items-center justify-between w-full md:w-auto">
+        <div onclick="navigateTo('page-home')" class="flex items-center gap-3 cursor-pointer">
+          <img src="2.png" alt="Vexel Logo" class="h-10 w-auto rounded-lg">
+          <div>
+            <h1 class="text-xl font-bold text-[#f5ebe6] leading-none">Vexel</h1>
+            <span class="text-[10px] text-yellow-200 tracking-widest uppercase">Gameshop</span>
+          </div>
+        </div>
+
+        <!-- Tombol Panel Penjual (Tampilan Mobile) -->
+        <button id="btn-seller-mobile" onclick="navigateTo('page-seller')" class="md:hidden text-xs bg-white/20 hover:bg-white/30 text-white font-semibold px-3 py-1.5 rounded-xl backdrop-blur-sm">
+          Panel Penjual
+        </button>
+        <!-- Tombol Kembali ke Toko (Tampilan Mobile - Hanya di Page Penjual) -->
+        <button id="btn-buyer-mobile" onclick="navigateTo('page-home')" class="hidden md:hidden text-xs bg-white/20 hover:bg-white/30 text-white font-semibold px-3 py-1.5 rounded-xl backdrop-blur-sm">
+          ← Kembali ke Toko
+        </button>
+      </div>
+      
+      <!-- Search Bar (Hanya Muncul di Home Page) -->
+      <div id="nav-search-container" class="w-full md:w-1/2">
+        <input 
+          type="text" 
+          id="searchInput" 
+          placeholder="Cari skin, weapon, atau nama game..." 
+          class="w-full px-4 py-2 rounded-xl bg-white/90 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-yellow-300 text-sm shadow-inner"
+          onkeyup="searchItems()"
+        >
+      </div>
+
+      <!-- Tombol Navigasi Desktop -->
+      <button id="btn-seller-desktop" onclick="navigateTo('page-seller')" class="hidden md:block text-xs bg-white/20 hover:bg-white/30 text-white font-semibold px-4 py-2 rounded-xl backdrop-blur-sm transition">
+        Panel Penjual
+      </button>
+      <button id="btn-buyer-desktop" onclick="navigateTo('page-home')" class="hidden text-xs bg-white/20 hover:bg-white/30 text-white font-semibold px-4 py-2 rounded-xl backdrop-blur-sm transition">
+        ← Kembali ke Toko Utama
+      </button>
+    </div>
+  </nav>
+
+  <!-- ================= TAHAP 1: HOME PAGE ================= -->
+  <section id="page-home" class="page-section max-w-6xl mx-auto p-4 md:p-6 space-y-8">
+    <!-- Item Populer -->
+    <div>
+      <h2 class="text-lg font-bold mb-4 border-l-4 border-[#008bd0] pl-3 text-slate-900">✨ Item Populer Ditransaksikan</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" id="popularList"></div>
+    </div>
+
+    <!-- Katalog Item -->
+    <div>
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+        <h2 class="text-lg font-bold border-l-4 border-[#008bd0] pl-3 text-slate-900">🎮 Katalog Item Trade</h2>
+        <select id="categoryFilter" onchange="searchItems()" class="bg-white border border-sky-300 text-sm rounded-xl p-2 focus:ring-2 focus:ring-[#008bd0] text-slate-800 shadow-sm">
+          <option value="ALL">Semua Tipe Item</option>
+          <option value="Skin">Skin / Cosmetic</option>
+          <option value="Weapon">Weapon / Equipment</option>
+          <option value="Currency">In-Game Currency</option>
+        </select>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" id="itemList"></div>
+    </div>
+  </section>
+
+  <!-- ================= TAHAP 2: DETAIL PRODUK ================= -->
+  <section id="page-detail" class="page-section max-w-4xl mx-auto p-4 md:p-6 hidden">
+    <button onclick="navigateTo('page-home')" class="mb-4 text-xs bg-white/70 hover:bg-white px-3 py-1.5 rounded-xl text-slate-700 font-medium shadow-sm border border-sky-200">
+      ← Kembali ke Katalog
+    </button>
+    
+    <div class="bg-white/90 backdrop-blur-md rounded-2xl border border-sky-200 p-6 shadow-xl space-y-6">
+      <div class="border-b border-sky-100 pb-4">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-xs font-semibold bg-sky-100 text-[#008bd0] px-2.5 py-1 rounded-md border border-sky-200" id="detailGame"></span>
+          <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md" id="detailCategory"></span>
+        </div>
+        <h2 class="text-2xl font-bold text-slate-800" id="detailName"></h2>
+        <p class="text-xs text-slate-500 mt-1">Penjual: <span class="text-[#008bd0] font-bold" id="detailSeller"></span> (Rating 4.9/5 ★)</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-sky-50/80 p-4 rounded-xl border border-sky-200/60">
+        <div>
+          <p class="text-xs text-slate-500">Harga Satuan</p>
+          <p class="text-xl font-bold text-[#008bd0]" id="detailPrice"></p>
+        </div>
+        <div>
+          <p class="text-xs text-slate-500">Minimal Pembelian</p>
+          <p class="text-lg font-semibold text-slate-700" id="detailMinBuy"></p>
+        </div>
+        <div>
+          <p class="text-xs text-slate-500">Stok Tersedia</p>
+          <p class="text-lg font-semibold text-slate-700" id="detailStock"></p>
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <label for="quantityInput" class="block text-sm font-medium text-slate-700">Jumlah yang Ingin Dibeli:</label>
+        <div class="flex items-center gap-3">
+          <input type="number" id="quantityInput" onchange="updateDetailTotal()" onkeyup="updateDetailTotal()" class="w-32 px-3 py-2 bg-white border border-sky-300 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#008bd0]">
+          <span class="text-xs text-slate-500">(Minimal <span id="detailMinHint"></span> unit)</span>
+        </div>
+      </div>
+
+      <div class="space-y-3 border-t border-sky-100 pt-4">
+        <h3 class="text-md font-bold text-slate-800">Deskripsi Item & Ketentuan Trade</h3>
+        <p class="text-sm text-slate-600 leading-relaxed bg-white/50 p-4 rounded-xl border border-sky-100 whitespace-pre-line" id="detailDesc"></p>
+      </div>
+
+      <div class="border-t border-sky-100 pt-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div>
+          <p class="text-xs text-slate-500">Total Harga:</p>
+          <p class="text-2xl font-bold text-[#008bd0]" id="detailTotalPrice">Rp 0</p>
+        </div>
+        <button onclick="goToPayment()" class="w-full sm:w-auto bg-[#008bd0] hover:bg-[#0073ad] text-white font-bold py-3 px-8 rounded-xl transition shadow-md">
+          Lanjut ke Pembayaran →
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TAHAP 3: PEMBAYARAN ================= -->
+  <section id="page-payment" class="page-section max-w-4xl mx-auto p-4 md:p-6 hidden">
+    <button onclick="navigateTo('page-detail')" class="mb-4 text-xs bg-white/70 hover:bg-white px-3 py-1.5 rounded-xl text-slate-700 font-medium shadow-sm border border-sky-200">
+      ← Kembali ke Detail Item
+    </button>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="md:col-span-2 space-y-6">
+        <!-- Input Nickname -->
+        <div class="bg-white/90 backdrop-blur-md p-5 rounded-2xl border border-sky-200 shadow-md space-y-4">
+          <h2 class="text-base font-bold text-[#008bd0] border-b border-sky-100 pb-2">📋 Data Tujuan Trade</h2>
+          <div>
+            <label class="block text-xs text-slate-600 mb-1">Nickname In-Game / Character Name *</label>
+            <input type="text" id="payNickname" placeholder="Contoh: ExileRunner#1234" class="w-full px-3 py-2 bg-white border border-sky-300 rounded-xl text-sm focus:ring-2 focus:ring-[#008bd0] outline-none">
+          </div>
+        </div>
+
+        <!-- Toggle Bukti Transaksi -->
+        <div class="bg-white/90 backdrop-blur-md p-5 rounded-2xl border border-sky-200 shadow-md space-y-3">
+          <div class="flex justify-between items-center">
+            <h2 class="text-base font-bold text-[#008bd0]">📸 Layanan Bukti Transaksi</h2>
+            <span id="proofBadge" class="text-[10px] px-2.5 py-0.5 rounded-full font-semibold"></span>
+          </div>
+          <p class="text-xs text-slate-600">Dapatkan bukti penyerahan item berupa <span class="text-[#008bd0] font-semibold">foto screenshot / video</span> saat trade berlangsung.</p>
+          
+          <div id="proofBox" class="flex items-center justify-between bg-sky-50 p-3 rounded-xl border border-sky-200 mt-2">
+            <div>
+              <p class="text-sm font-semibold text-slate-700">Minta Bukti Foto / Video (+5%)</p>
+              <p class="text-xs text-[#008bd0] font-medium" id="proofFeeText">+Rp 0</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="proofToggle" class="sr-only peer" onchange="renderPaymentSummary()">
+              <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#008bd0]"></div>
+            </label>
+          </div>
+          <p id="proofNotice" class="hidden text-xs text-amber-600 italic">* Penjual tidak menyediakan fitur lampiran bukti untuk item ini.</p>
+        </div>
+
+        <!-- Opsi Pembayaran -->
+        <div class="bg-white/90 backdrop-blur-md p-5 rounded-2xl border border-sky-200 shadow-md space-y-4">
+          <h2 class="text-base font-bold text-[#008bd0] border-b border-sky-100 pb-2">💳 Metode Pembayaran</h2>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-center p-3 bg-sky-50/50 rounded-xl border border-sky-200 cursor-pointer hover:border-[#008bd0]">
+              <input type="radio" name="payment" value="QRIS" class="accent-[#008bd0]" checked>
+              <span class="ml-2 text-sm font-medium text-slate-700">QRIS Instant</span>
+            </label>
+            <label class="flex items-center p-3 bg-sky-50/50 rounded-xl border border-sky-200 cursor-pointer hover:border-[#008bd0]">
+              <input type="radio" name="payment" value="BCA VA" class="accent-[#008bd0]">
+              <span class="ml-2 text-sm font-medium text-slate-700">BCA Virtual Account</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ringkasan Pembayaran -->
+      <div>
+        <div class="bg-white/90 backdrop-blur-md p-5 rounded-2xl border border-sky-200 shadow-md space-y-4 sticky top-24">
+          <h2 class="text-base font-bold text-[#008bd0] border-b border-sky-100 pb-2">Ringkasan Pesanan</h2>
+          <div class="text-sm space-y-1">
+            <p class="font-bold text-slate-800" id="summaryName"></p>
+            <p class="text-xs text-slate-500">Jumlah: <span id="summaryQty" class="text-slate-800"></span></p>
+          </div>
+          <div class="border-t border-sky-100 pt-3 space-y-2 text-xs text-slate-600">
+            <div class="flex justify-between"><span>Subtotal Item</span><span id="summarySubtotal" class="font-semibold text-slate-800"></span></div>
+            <div class="flex justify-between"><span>Layanan Bukti (5%)</span><span id="summaryProof" class="font-semibold text-[#008bd0]">Rp 0</span></div>
+            <div class="flex justify-between"><span>Biaya Layanan</span><span class="font-semibold text-slate-800">Rp 1.000</span></div>
+          </div>
+          <div class="border-t border-sky-100 pt-3 flex justify-between items-center">
+            <span class="font-bold text-sm text-slate-800">Total Bayar:</span>
+            <span id="summaryGrandTotal" class="text-xl font-bold text-[#008bd0]"></span>
+          </div>
+          <button onclick="finishOrder()" class="w-full bg-[#008bd0] hover:bg-[#0073ad] text-white font-bold py-3 rounded-xl transition shadow-md">
+            Bayar Sekarang
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TAHAP 4: DASHBOARD PENJUAL ================= -->
+  <section id="page-seller" class="page-section max-w-6xl mx-auto p-4 md:p-6 space-y-6 hidden">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/90 backdrop-blur-md p-6 rounded-2xl border border-sky-200 shadow-md">
+      <div>
+        <h2 class="text-lg font-bold text-slate-800">Halo, <span class="text-[#008bd0]">ProTrader_99</span>! 👋</h2>
+        <p class="text-xs text-slate-500 mt-0.5">Kelola barang dagangan dan ketersediaan opsi bukti transaksi tokomu.</p>
+      </div>
+      <button onclick="openFormModal()" class="bg-[#008bd0] hover:bg-[#0073ad] text-white font-bold px-4 py-2 rounded-xl text-sm transition shadow-md w-full sm:w-auto">
+        + Tambah Barang Baru
+      </button>
+    </div>
+
+    <div class="bg-white/90 backdrop-blur-md rounded-2xl border border-sky-200 overflow-hidden shadow-md">
+      <div class="p-4 border-b border-sky-100 flex justify-between items-center">
+        <h3 class="font-bold text-[#008bd0]">Daftar Item Dagangan</h3>
+        <span class="text-xs text-slate-500" id="itemCount">Total: 0 Item</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm text-slate-700">
+          <thead class="bg-sky-50/80 text-xs text-slate-500 uppercase border-b border-sky-200">
+            <tr>
+              <th class="p-4">Item & Game</th>
+              <th class="p-4">Harga</th>
+              <th class="p-4">Stok</th>
+              <th class="p-4">Min. Beli</th>
+              <th class="p-4">Opsi Bukti (5%)</th>
+              <th class="p-4 text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="sellerTableBody" class="divide-y divide-sky-100"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODAL FORM INPUT/EDIT PENJUAL -->
+  <div id="productModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
+    <div class="bg-white rounded-2xl border border-sky-200 max-w-lg w-full p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-sky-100 pb-3">
+        <h3 class="text-lg font-bold text-[#008bd0]" id="modalTitle">Tambah Item Baru</h3>
+        <button onclick="closeFormModal()" class="text-slate-400 hover:text-slate-600 font-bold text-xl">&times;</button>
+      </div>
+      
+      <form onsubmit="saveSellerItem(event)" class="space-y-4 text-sm">
+        <input type="hidden" id="inputEditId">
+        
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs text-slate-600 mb-1">Nama Game</label>
+            <input type="text" id="inputGame" required class="w-full px-3 py-2 border border-sky-300 rounded-xl focus:ring-2 focus:ring-[#008bd0] outline-none">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-600 mb-1">Kategori</label>
+            <select id="inputCategory" class="w-full px-3 py-2 border border-sky-300 rounded-xl focus:ring-2 focus:ring-[#008bd0] outline-none">
+              <option value="Skin">Skin / Cosmetic</option>
+              <option value="Weapon">Weapon / Equipment</option>
+              <option value="Currency">In-Game Currency</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs text-slate-600 mb-1">Nama Item</label>
+          <input type="text" id="inputName" required class="w-full px-3 py-2 border border-sky-300 rounded-xl focus:ring-2 focus:ring-[#008bd0] outline-none">
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs text-slate-600 mb-1">Harga (Rp)</label>
+            <input type="number" id="inputPrice" required min="1000" class="w-full px-3 py-2 border border-sky-300 rounded-xl focus:ring-2 focus:ring-[#008bd0] outline-none">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-600 mb-1">Stok</label>
+            <input type="number" id="inputStock" required min="1" class="w-full px-3 py-2 border border-sky-300 rounded-xl focus:ring-2 focus:ring-[#008bd0] outline-none">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-600 mb-1">Min. Beli</label>
+            <input type="number" id="inputMin" required min="1" class="w-full px-3 py-2 border border-sky-300 rounded-xl focus:ring-2 focus:ring-[#008bd0] outline-none">
+          </div>
+        </div>
+
+        <div class="bg-sky-50 p-3 rounded-xl border border-sky-200 flex justify-between items-center">
+          <div>
+            <p class="font-medium text-slate-700">Sediakan Layanan Bukti (Foto/Video)?</p>
+            <p class="text-[11px] text-slate-500">Pembeli dapat memilih opsi +5% biaya saat checkout.</p>
+          </div>
+          <input type="checkbox" id="inputProof" class="w-5 h-5 accent-[#008bd0] rounded cursor-pointer">
+        </div>
+
+        <div>
+          <label class="block text-xs text-slate-600 mb-1">Deskripsi Trade</label>
+          <textarea id="inputDesc" rows="3" class="w-full px-3 py-2 border border-sky-300 rounded-xl focus:ring-2 focus:ring-[#008bd0] outline-none"></textarea>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2 border-t border-sky-100">
+          <button type="button" onclick="closeFormModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-600 font-medium">Batal</button>
+          <button type="submit" class="px-4 py-2 bg-[#008bd0] hover:bg-[#0073ad] font-bold rounded-xl text-white">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIKA UTAMA PERHUBUNGAN -->
+  <script>
+    let products = [
+      { id: 1, name: "Awakened Divine Orb", game: "Path of Exile", category: "Currency", price: 8500, stock: 250, minBuy: 10, providesProof: true, seller: "ProTrader_99", popular: true, desc: "• Trade via Party Face-to-Face\n• League: Settlers Softcore\n• Sertakan item sampah di trade window." },
+      { id: 2, name: "AK-47 | Redline (Field-Tested)", game: "CS:GO / CS2", category: "Weapon", price: 210000, stock: 5, minBuy: 1, providesProof: true, seller: "ProTrader_99", popular: true, desc: "• Dikirim via Steam Trade Offer Instant 24 Jam." },
+      { id: 3, name: "Dragonclaw Hook", game: "Dota 2", category: "Skin", price: 2450000, stock: 2, minBuy: 1, providesProof: false, seller: "ProTrader_99", popular: true, desc: "• Clean item, no gems. Direct Steam Trade." },
+      { id: 4, name: "1.000.000 Gold", game: "World of Warcraft", category: "Currency", price: 150000, stock: 20, minBuy: 1, providesProof: false, seller: "GamerGold_ID", popular: false, desc: "• Transaksi via In-Game Mail / Face-to-Face Guild Bank." }
+    ];
+
+    let selectedProduct = null;
+    let selectedQty = 1;
+
+    // SAKLAR NAVIGASI SPA
+    function navigateTo(pageId) {
+      document.querySelectorAll('.page-section').forEach(sec => sec.classList.add('hidden'));
+      document.getElementById(pageId).classList.remove('hidden');
+
+      const searchNav = document.getElementById('nav-search-container');
+      const btnSellerDesktop = document.getElementById('btn-seller-desktop');
+      const btnBuyerDesktop = document.getElementById('btn-buyer-desktop');
+      const btnSellerMobile = document.getElementById('btn-seller-mobile');
+      const btnBuyerMobile = document.getElementById('btn-buyer-mobile');
+
+      if (pageId === 'page-seller') {
+        searchNav.style.display = 'none';
+        btnSellerDesktop.classList.add('hidden');
+        btnBuyerDesktop.classList.remove('hidden');
+        btnSellerMobile.classList.add('hidden');
+        btnBuyerMobile.classList.remove('hidden');
+        renderSellerTable();
+      } else {
+        searchNav.style.display = (pageId === 'page-home') ? 'block' : 'none';
+        btnSellerDesktop.classList.remove('hidden');
+        btnBuyerDesktop.classList.add('hidden');
+        btnSellerMobile.classList.remove('hidden');
+        btnBuyerMobile.classList.add('hidden');
+        if (pageId === 'page-home') renderHomeProducts();
+      }
+
+      window.scrollTo(0, 0);
+    }
+
+    // LOGIKA TAHAP 1
+    function renderHomeProducts(items = products) {
+      const popularContainer = document.getElementById('popularList');
+      const allContainer = document.getElementById('itemList');
+      popularContainer.innerHTML = '';
+      allContainer.innerHTML = '';
+
+      items.filter(p => p.popular).forEach(item => {
+        popularContainer.innerHTML += createCardHTML(item);
+      });
+
+      items.forEach(item => {
+        allContainer.innerHTML += createCardHTML(item);
+      });
+    }
+
+    function createCardHTML(item) {
+      return `
+        <div onclick="openProductDetail(${item.id})" class="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-sky-200 hover:border-[#008bd0] transition duration-200 cursor-pointer flex flex-col justify-between shadow-md hover:shadow-lg">
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs text-[#008bd0] font-bold">${item.game}</span>
+              <span class="text-[10px] bg-sky-100 text-sky-800 px-2 py-0.5 rounded-full border border-sky-300/40">${item.category}</span>
+            </div>
+            <h3 class="font-bold text-base text-slate-800">${item.name}</h3>
+          </div>
+          <div class="mt-4 pt-3 border-t border-sky-200/60 flex justify-between items-end">
+            <span class="text-xs text-slate-500">Min: ${item.minBuy} Unit</span>
+            <span class="text-[#008bd0] font-bold text-base">Rp ${item.price.toLocaleString('id-ID')}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function searchItems() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      const cat = document.getElementById('categoryFilter').value;
+      const filtered = products.filter(p => {
+        const matchQ = p.name.toLowerCase().includes(q) || p.game.toLowerCase().includes(q);
+        const matchC = cat === 'ALL' || p.category === cat;
+        return matchQ && matchC;
+      });
+      renderHomeProducts(filtered);
+    }
+
+    // LOGIKA TAHAP 2
+    function openProductDetail(id) {
+      selectedProduct = products.find(p => p.id === id);
+      if (!selectedProduct) return;
+
+      document.getElementById('detailGame').innerText = selectedProduct.game;
+      document.getElementById('detailCategory').innerText = selectedProduct.category;
+      document.getElementById('detailName').innerText = selectedProduct.name;
+      document.getElementById('detailSeller').innerText = selectedProduct.seller;
+      document.getElementById('detailPrice').innerText = `Rp ${selectedProduct.price.toLocaleString('id-ID')}`;
+      document.getElementById('detailMinBuy').innerText = `${selectedProduct.minBuy} Unit`;
+      document.getElementById('detailStock').innerText = `${selectedProduct.stock} Unit`;
+      document.getElementById('detailDesc').innerText = selectedProduct.desc || "Tidak ada deskripsi tambahan.";
+      
+      const qtyInput = document.getElementById('quantityInput');
+      qtyInput.min = selectedProduct.minBuy;
+      qtyInput.max = selectedProduct.stock;
+      qtyInput.value = selectedProduct.minBuy;
+      document.getElementById('detailMinHint').innerText = selectedProduct.minBuy;
+
+      updateDetailTotal();
+      navigateTo('page-detail');
+    }
+
+    function updateDetailTotal() {
+      const qtyInput = document.getElementById('quantityInput');
+      let val = parseInt(qtyInput.value) || 0;
+      if (val < selectedProduct.minBuy) val = selectedProduct.minBuy;
+      if (val > selectedProduct.stock) val = selectedProduct.stock;
+      
+      selectedQty = val;
+      const total = val * selectedProduct.price;
+      document.getElementById('detailTotalPrice').innerText = `Rp ${total.toLocaleString('id-ID')}`;
+    }
+
+    // LOGIKA TAHAP 3
+    function goToPayment() {
+      navigateTo('page-payment');
+      
+      const toggle = document.getElementById('proofToggle');
+      const box = document.getElementById('proofBox');
+      const notice = document.getElementById('proofNotice');
+      const badge = document.getElementById('proofBadge');
+
+      toggle.checked = false;
+
+      if (!selectedProduct.providesProof) {
+        toggle.disabled = true;
+        box.classList.add('opacity-50', 'pointer-events-none');
+        notice.classList.remove('hidden');
+        badge.innerText = "Tidak Tersedia";
+        badge.className = "text-[10px] px-2.5 py-0.5 rounded-full font-semibold bg-rose-100 text-rose-800 border border-rose-300";
+      } else {
+        toggle.disabled = false;
+        box.classList.remove('opacity-50', 'pointer-events-none');
+        notice.classList.add('hidden');
+        badge.innerText = "Tersedia (+5%)";
+        badge.className = "text-[10px] px-2.5 py-0.5 rounded-full font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300";
+      }
+
+      renderPaymentSummary();
+    }
+
+    function renderPaymentSummary() {
+      const subtotal = selectedQty * selectedProduct.price;
+      const isProofChecked = document.getElementById('proofToggle').checked && selectedProduct.providesProof;
+      const proofFee = isProofChecked ? Math.round(subtotal * 0.05) : 0;
+      const grandTotal = subtotal + proofFee + 1000;
+
+      document.getElementById('summaryName').innerText = selectedProduct.name;
+      document.getElementById('summaryQty').innerText = `${selectedQty} Unit`;
+      document.getElementById('summarySubtotal').innerText = `Rp ${subtotal.toLocaleString('id-ID')}`;
+      document.getElementById('proofFeeText').innerText = `+Rp ${Math.round(subtotal * 0.05).toLocaleString('id-ID')}`;
+      document.getElementById('summaryProof').innerText = `Rp ${proofFee.toLocaleString('id-ID')}`;
+      document.getElementById('summaryGrandTotal').innerText = `Rp ${grandTotal.toLocaleString('id-ID')}`;
+    }
+
+    function finishOrder() {
+      const nick = document.getElementById('payNickname').value.trim();
+      if (!nick) return alert("Harap isi Nickname In-Game terlebih dahulu!");
+
+      const isProof = document.getElementById('proofToggle').checked && selectedProduct.providesProof;
+      const payMethod = document.querySelector('input[name="payment"]:checked').value;
+
+      alert(`✅ [TRANSAKSI BERHASIL]\n\nToko: Vexel Gameshop\nItem: ${selectedProduct.name}\nNickname: ${nick}\nPembayaran: ${payMethod}\nLayanan Bukti: ${isProof ? 'Aktif' : 'Tidak'}\nTotal: ${document.getElementById('summaryGrandTotal').innerText}`);
+      navigateTo('page-home');
+    }
+
+    // LOGIKA TAHAP 4
+    function renderSellerTable() {
+      const tbody = document.getElementById('sellerTableBody');
+      tbody.innerHTML = '';
+
+      products.forEach(item => {
+        tbody.innerHTML += `
+          <tr class="hover:bg-sky-50/50">
+            <td class="p-4">
+              <p class="font-bold text-slate-800">${item.name}</p>
+              <span class="text-xs text-[#008bd0]">${item.game}</span> • <span class="text-[10px] text-slate-500">${item.category}</span>
+            </td>
+            <td class="p-4 font-semibold text-slate-800">Rp ${item.price.toLocaleString('id-ID')}</td>
+            <td class="p-4">${item.stock} Unit</td>
+            <td class="p-4">${item.minBuy} Unit</td>
+            <td class="p-4">
+              ${item.providesProof 
+                ? '<span class="text-xs bg-emerald-100 text-emerald-800 border border-emerald-300 px-2.5 py-0.5 rounded-full font-medium">Tersedia (+5%)</span>' 
+                : '<span class="text-xs bg-slate-100 text-slate-500 px-2.5 py-0.5 rounded-full">Tidak Aktif</span>'}
+            </td>
+            <td class="p-4 text-center space-x-2">
+              <button onclick="editSellerItem(${item.id})" class="text-xs bg-amber-500 hover:bg-amber-600 px-2.5 py-1 rounded-lg text-white font-medium">Edit</button>
+              <button onclick="deleteSellerItem(${item.id})" class="text-xs bg-rose-500 hover:bg-rose-600 px-2.5 py-1 rounded-lg text-white font-medium">Hapus</button>
+            </td>
+          </tr>
+        `;
+      });
+
+      document.getElementById('itemCount').innerText = `Total: ${products.length} Item`;
+    }
+
+    function openFormModal(isEdit = false) {
+      document.getElementById('modalTitle').innerText = isEdit ? "Update Item Dagangan" : "Tambah Item Baru";
+      document.getElementById('productModal').classList.remove('hidden');
+    }
+
+    function closeFormModal() {
+      document.getElementById('productModal').classList.add('hidden');
+      document.getElementById('inputEditId').value = '';
+    }
+
+    function saveSellerItem(e) {
+      e.preventDefault();
+      const editId = document.getElementById('inputEditId').value;
+      const data = {
+        id: editId ? parseInt(editId) : Date.now(),
+        name: document.getElementById('inputName').value,
+        game: document.getElementById('inputGame').value,
+        category: document.getElementById('inputCategory').value,
+        price: parseInt(document.getElementById('inputPrice').value),
+        stock: parseInt(document.getElementById('inputStock').value),
+        minBuy: parseInt(document.getElementById('inputMin').value),
+        providesProof: document.getElementById('inputProof').checked,
+        desc: document.getElementById('inputDesc').value,
+        seller: "ProTrader_99",
+        popular: false
+      };
+
+      if (editId) {
+        const idx = products.findIndex(p => p.id === parseInt(editId));
+        if (idx !== -1) products[idx] = { ...products[idx], ...data };
+      } else {
+        products.push(data);
+      }
+
+      renderSellerTable();
+      closeFormModal();
+    }
+
+    function editSellerItem(id) {
+      const item = products.find(p => p.id === id);
+      if (!item) return;
+
+      document.getElementById('inputEditId').value = item.id;
+      document.getElementById('inputGame').value = item.game;
+      document.getElementById('inputCategory').value = item.category;
+      document.getElementById('inputName').value = item.name;
+      document.getElementById('inputPrice').value = item.price;
+      document.getElementById('inputStock').value = item.stock;
+      document.getElementById('inputMin').value = item.minBuy;
+      document.getElementById('inputProof').checked = item.providesProof;
+      document.getElementById('inputDesc').value = item.desc || '';
+
+      openFormModal(true);
+    }
+
+    function deleteSellerItem(id) {
+      if (confirm("Hapus item ini dari toko?")) {
+        products = products.filter(p => p.id !== id);
+        renderSellerTable();
+      }
+    }
+
+    // Inisialisasi awal
+    navigateTo('page-home');
+  </script>
+</body>
+</html>
