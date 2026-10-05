@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vexel Gameshop - Premium Item Marketplace</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Poppins', sans-serif; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #e0f2fe; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: #7dd3fc; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
+    
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .chat-message { animation: slideUp 0.3s ease-out forwards; }
+  </style>
+</head>
+<body class="bg-[#b7e7f3] text-slate-800 min-h-screen selection:bg-[#008bd0] selection:text-white pb-10">
+
+  <!-- ================= NAVBAR ================= -->
+  <nav class="bg-[#008bd0] p-4 sticky top-0 z-50 shadow-lg shadow-[#008bd0]/20">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="flex items-center justify-between w-full md:w-auto">
+        <div onclick="navigateTo('page-home')" class="flex items-center gap-3 cursor-pointer group">
+          <img src="https://placehold.co/100x100/ffffff/008bd0?text=V&font=Montserrat" alt="Vexel Logo" class="h-11 w-11 rounded-xl shadow-md group-hover:scale-105 transition-transform">
+          <div>
+            <h1 class="text-2xl font-bold text-[#f5ebe6] leading-none tracking-tight">Vexel</h1>
+            <span class="text-[10px] text-yellow-200 tracking-[0.2em] uppercase font-semibold">Gameshop</span>
+          </div>
+        </div>
+        <!-- Tombol Mobile -->
+        <div class="md:hidden flex gap-2">
+          <button onclick="navigateTo('page-orders')" class="text-xs bg-white/20 hover:bg-white/30 text-white font-semibold px-3 py-2 rounded-xl backdrop-blur-sm">📦</button>
+          <button id="btn-seller-mobile" onclick="navigateTo('page-seller')" class="text-xs bg-white/20 hover:bg-white/30 text-white font-semibold px-3 py-2 rounded-xl backdrop-blur-sm">Penjual</button>
+        </div>
+      </div>
+      
+      <div id="nav-search-container" class="w-full md:w-1/3 relative group">
+        <input type="text" id="searchInput" placeholder="Cari skin, weapon..." class="w-full px-4 py-2.5 rounded-2xl bg-white/95 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-yellow-300/50 text-sm shadow-inner" onkeyup="searchItems()">
+      </div>
+
+      <!-- Tombol Desktop -->
+      <div class="hidden md:flex items-center gap-3">
+        <button onclick="openChat('Customer Service')" class="text-sm bg-white/10 hover:bg-white/20 text-white font-semibold px-4 py-2.5 rounded-xl backdrop-blur-sm transition-all flex items-center gap-2">
+          💬 Chat
+        </button>
+        <button onclick="navigateTo('page-orders')" class="text-sm bg-white/20 hover:bg-white/30 text-white font-semibold px-4 py-2.5 rounded-xl backdrop-blur-sm transition-all flex items-center gap-2">
+          📦 Pesanan Saya
+        </button>
+        <button id="btn-seller-desktop" onclick="navigateTo('page-seller')" class="text-sm bg-amber-400 hover:bg-amber-500 text-slate-900 font-bold px-5 py-2.5 rounded-xl backdrop-blur-sm transition-all">
+          Panel Penjual
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ================= TAHAP 1: HOME PAGE ================= -->
+  <section id="page-home" class="page-section max-w-6xl mx-auto p-4 md:p-6 space-y-10 mt-4">
+    <!-- Item Populer -->
+    <div>
+      <div class="flex items-center gap-2 mb-6">
+        <span class="text-2xl">✨</span>
+        <h2 class="text-xl font-bold text-slate-800">Item Populer Ditransaksikan</h2>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6" id="popularList"></div>
+    </div>
+
+    <!-- Katalog -->
+    <div>
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">🎮</span>
+          <h2 class="text-xl font-bold text-slate-800">Katalog Item Trade</h2>
+        </div>
+        <select id="categoryFilter" onchange="searchItems()" class="bg-white/90 backdrop-blur-sm border-2 border-sky-200 text-sm rounded-xl px-4 py-2.5 focus:border-[#008bd0] focus:ring-0 text-slate-800 outline-none cursor-pointer">
+          <option value="ALL">Semua Tipe Item</option>
+          <option value="Skin">Skin / Cosmetic</option>
+          <option value="Weapon">Weapon / Equipment</option>
+          <option value="Currency">In-Game Currency</option>
+        </select>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6" id="itemList"></div>
+    </div>
+  </section>
+
+  <!-- ================= TAHAP 2: DETAIL PRODUK ================= -->
+  <section id="page-detail" class="page-section max-w-5xl mx-auto p-4 md:p-6 hidden mt-4">
+    <button onclick="navigateTo('page-home')" class="mb-6 text-sm bg-white/80 hover:bg-white px-4 py-2 rounded-xl text-slate-700 font-semibold shadow-sm border border-sky-200 transition-all hover:-translate-x-1">
+      ← Kembali ke Katalog
+    </button>
+    
+    <div class="bg-white/90 backdrop-blur-md rounded-3xl border border-sky-200 p-6 md:p-8 shadow-2xl flex flex-col md:flex-row gap-8">
+      <div class="w-full md:w-2/5 flex flex-col gap-4">
+        <div class="relative w-full aspect-square rounded-2xl overflow-hidden border-4 border-sky-50 shadow-inner bg-sky-100">
+          <img id="detailImage" src="" alt="Gambar Produk" class="w-full h-full object-cover">
+        </div>
+      </div>
+
+      <div class="w-full md:w-3/5 space-y-6 flex flex-col justify-between">
+        <div>
+          <h2 class="text-3xl font-bold text-slate-800 leading-tight" id="detailName"></h2>
+          <p class="text-sm text-slate-500 mt-2">Penjual: <span class="text-[#008bd0] font-bold cursor-pointer hover:underline" id="detailSeller"></span> <span class="text-amber-400">★ 4.9</span></p>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4 bg-sky-50/80 p-5 rounded-2xl border border-sky-200/60 shadow-inner">
+          <div>
+            <p class="text-[11px] font-semibold text-slate-500 uppercase">Harga Satuan</p>
+            <p class="text-xl font-bold text-[#008bd0]" id="detailPrice"></p>
+          </div>
+          <div>
+            <p class="text-[11px] font-semibold text-slate-500 uppercase">Min. Beli</p>
+            <p class="text-lg font-semibold text-slate-700" id="detailMinBuy"></p>
+          </div>
+          <div>
+            <p class="text-[11px] font-semibold text-slate-500 uppercase">Stok</p>
+            <p class="text-lg font-semibold text-slate-700" id="detailStock"></p>
+          </div>
+        </div>
+
+        <!-- Deskripsi Item Dikembalikan -->
+        <div class="space-y-3">
+          <h3 class="text-sm font-bold text-slate-800">Deskripsi & Ketentuan Trade</h3>
+          <div class="bg-white/60 p-4 rounded-2xl border border-sky-100 shadow-sm text-sm text-slate-600 leading-relaxed whitespace-pre-line h-32 overflow-y-auto" id="detailDesc"></div>
+        </div>
+
+        <div class="border-t border-sky-200 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div class="flex items-center gap-4 w-full sm:w-auto">
+            <div class="flex flex-col">
+              <label class="text-xs font-bold text-slate-500 mb-1">Atur Jumlah</label>
+              <input type="number" id="quantityInput" onchange="updateDetailTotal()" onkeyup="updateDetailTotal()" class="w-24 px-3 py-2.5 bg-white border-2 border-sky-200 rounded-xl text-slate-800 font-bold focus:outline-none focus:border-[#008bd0] text-center shadow-sm">
+            </div>
+            <div>
+              <p class="text-xs font-bold text-slate-500 mb-1">Total Harga</p>
+              <p class="text-2xl font-black text-[#008bd0]" id="detailTotalPrice">Rp 0</p>
+            </div>
+          </div>
+          <div class="flex gap-2 w-full sm:w-auto">
+            <button onclick="openChatFromDetail()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transition-all hover:-translate-y-1">
+              💬 Chat
+            </button>
+            <button onclick="goToPayment()" class="flex-1 sm:flex-none bg-gradient-to-r from-[#008bd0] to-[#006a9d] text-white font-bold py-3.5 px-8 rounded-xl shadow-lg hover:-translate-y-1">
+              Beli Sekarang →
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TAHAP 3: PEMBAYARAN ================= -->
+  <section id="page-payment" class="page-section max-w-5xl mx-auto p-4 md:p-6 hidden mt-4">
+    <button onclick="navigateTo('page-detail')" class="mb-6 text-sm bg-white/80 hover:bg-white px-4 py-2 rounded-xl text-slate-700 font-semibold shadow-sm border border-sky-200 transition-all hover:-translate-x-1">
+      ← Kembali ke Detail
+    </button>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div class="lg:col-span-2 space-y-6">
+        <div class="bg-white/90 backdrop-blur-md p-6 rounded-3xl border border-sky-200 shadow-xl space-y-5">
+          <h2 class="text-lg font-bold text-[#008bd0]">📋 Data Tujuan Trade</h2>
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Nickname In-Game <span class="text-rose-500">*</span></label>
+            <input type="text" id="payNickname" placeholder="Contoh: ExileRunner#1234" class="w-full px-4 py-3 bg-white border-2 border-sky-200 rounded-xl focus:border-[#008bd0] outline-none">
+          </div>
+        </div>
+
+        <div class="bg-white/90 backdrop-blur-md p-6 rounded-3xl border border-sky-200 shadow-xl space-y-4">
+          <div class="flex justify-between items-center">
+            <h2 class="text-lg font-bold text-[#008bd0]">📸 Layanan Bukti (+5%)</h2>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="proofToggle" class="sr-only peer" onchange="renderPaymentSummary()">
+              <div class="w-14 h-7 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#008bd0]"></div>
+            </label>
+          </div>
+          <p id="proofNotice" class="hidden text-sm text-rose-500">Penjual tidak menyediakan fitur bukti untuk item ini.</p>
+        </div>
+
+        <div class="bg-white/90 backdrop-blur-md p-6 rounded-3xl border border-sky-200 shadow-xl space-y-4">
+          <h2 class="text-lg font-bold text-[#008bd0]">💳 Metode Pembayaran</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <label class="flex items-center p-4 bg-white rounded-2xl border-2 border-sky-200 cursor-pointer hover:border-[#008bd0] has-[:checked]:border-[#008bd0] has-[:checked]:bg-sky-50">
+              <input type="radio" name="payment" value="QRIS" class="w-5 h-5 accent-[#008bd0]" checked>
+              <span class="ml-3 font-bold text-slate-700">QRIS Instant</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="bg-white/90 backdrop-blur-md p-6 rounded-3xl border border-sky-200 shadow-xl space-y-6 sticky top-28">
+          <h2 class="text-lg font-bold text-[#008bd0] border-b-2 border-sky-100 pb-3">Ringkasan Pesanan</h2>
+          <div class="flex items-center gap-4">
+            <img id="summaryImage" src="" class="w-16 h-16 rounded-xl object-cover border border-sky-200">
+            <div>
+              <p class="font-bold text-slate-800 line-clamp-2" id="summaryName"></p>
+              <p class="text-sm font-medium text-slate-500">Jumlah: <span id="summaryQty" class="text-[#008bd0] font-bold"></span></p>
+            </div>
+          </div>
+          
+          <!-- BAGIAN INI YANG SEBELUMNYA HILANG DAN BIKIN ERROR -->
+          <div class="border-t-2 border-sky-100 pt-4 space-y-3 text-sm text-slate-600 font-medium">
+            <div class="flex justify-between"><span>Subtotal Item</span><span id="summarySubtotal" class="font-bold text-slate-800"></span></div>
+            <div class="flex justify-between"><span>Layanan Bukti (5%)</span><span id="summaryProof" class="font-bold text-[#008bd0]">Rp 0</span></div>
+            <div class="flex justify-between"><span>Biaya Layanan</span><span class="font-bold text-slate-800">Rp 1.000</span></div>
+          </div>
+          <!-- AKHIR PERBAIKAN -->
+
+          <div class="border-t-2 border-sky-100 pt-4">
+            <div class="flex justify-between items-end mb-6">
+              <span class="font-bold text-slate-500">Total Bayar</span>
+              <span id="summaryGrandTotal" class="text-2xl font-black text-[#008bd0]"></span>
+            </div>
+            <button onclick="finishOrder()" class="w-full bg-[#008bd0] hover:bg-[#0073ad] text-white font-bold py-4 rounded-xl shadow-lg">
+              Bayar Sekarang
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TAHAP 4: DAFTAR PESANAN ================= -->
+  <section id="page-orders" class="page-section max-w-5xl mx-auto p-4 md:p-6 hidden mt-4 space-y-6">
+    <div class="flex items-center gap-3 mb-4">
+      <span class="text-3xl">📦</span>
+      <h2 class="text-2xl font-bold text-slate-800">Pesanan Saya</h2>
+    </div>
+    
+    <!-- Filter Status -->
+    <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+      <button onclick="renderOrders('Semua')" class="px-5 py-2 rounded-xl text-sm font-bold bg-[#008bd0] text-white shadow-md order-filter">Semua</button>
+      <button onclick="renderOrders('Sedang Dikirim')" class="px-5 py-2 rounded-xl text-sm font-bold bg-white text-slate-600 shadow-sm order-filter">Sedang Dikirim</button>
+      <button onclick="renderOrders('Selesai')" class="px-5 py-2 rounded-xl text-sm font-bold bg-white text-slate-600 shadow-sm order-filter">Selesai</button>
+      <button onclick="renderOrders('Dibatalkan')" class="px-5 py-2 rounded-xl text-sm font-bold bg-white text-slate-600 shadow-sm order-filter">Dibatalkan</button>
+    </div>
+
+    <!-- List Pesanan -->
+    <div id="orderListContainer" class="space-y-4"></div>
+  </section>
+
+  <!-- ================= TAHAP 5: DASHBOARD PENJUAL ================= -->
+  <section id="page-seller" class="page-section max-w-6xl mx-auto p-4 md:p-6 space-y-6 hidden mt-4">
+    <div class="flex flex-col sm:flex-row justify-between items-center bg-white/90 p-6 rounded-3xl border border-sky-200 shadow-xl">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-800">Halo, <span class="text-[#008bd0]">ProTrader_99</span>! 👋</h2>
+        <p class="text-sm text-slate-500">Kelola inventarismu di sini.</p>
+      </div>
+      <!-- TOMBOL TAMBAH BARANG -->
+      <button onclick="openFormModal()" class="bg-[#008bd0] hover:bg-[#0073ad] text-white font-bold px-6 py-3 rounded-xl shadow-lg mt-4 sm:mt-0 w-full sm:w-auto">
+        + Tambah Barang Baru
+      </button>
+    </div>
+
+    <div class="bg-white/90 rounded-3xl border border-sky-200 overflow-hidden shadow-xl">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm text-slate-700 whitespace-nowrap">
+          <thead class="bg-sky-50 text-xs text-slate-500 uppercase font-bold">
+            <tr>
+              <th class="p-4 pl-6">Item</th>
+              <th class="p-4">Harga</th>
+              <th class="p-4">Stok</th>
+              <th class="p-4">Min. Beli</th>
+              <th class="p-4">Bukti</th>
+              <th class="p-4 text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="sellerTableBody" class="divide-y divide-sky-100"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MODAL PENJUAL ================= -->
+  <div id="productModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden flex justify-center items-center p-4 z-[60]">
+    <div class="bg-white rounded-3xl border border-sky-200 max-w-xl w-full p-6 md:p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-sky-100 pb-4 mb-4">
+        <h3 class="text-xl font-bold text-[#008bd0]" id="modalTitle">Tambah Item Baru</h3>
+        <button onclick="closeFormModal()" class="text-slate-400 hover:text-rose-500 text-2xl font-bold">&times;</button>
+      </div>
+      
+      <form onsubmit="saveSellerItem(event)" class="space-y-4 text-sm">
+        <input type="hidden" id="inputEditId">
+        <div>
+          <label class="block text-xs font-bold text-slate-500 mb-1">URL Gambar</label>
+          <input type="url" id="inputImage" required class="w-full px-4 py-2 border-2 border-sky-200 rounded-xl focus:border-[#008bd0] outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-500 mb-1">Nama Game</label>
+            <input type="text" id="inputGame" required class="w-full px-4 py-2 border-2 border-sky-200 rounded-xl focus:border-[#008bd0] outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500 mb-1">Kategori</label>
+            <select id="inputCategory" class="w-full px-4 py-2 border-2 border-sky-200 rounded-xl focus:border-[#008bd0] outline-none">
+              <option value="Skin">Skin / Cosmetic</option>
+              <option value="Weapon">Weapon / Equipment</option>
+              <option value="Currency">In-Game Currency</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-500 mb-1">Nama Item</label>
+          <input type="text" id="inputName" required class="w-full px-4 py-2 border-2 border-sky-200 rounded-xl focus:border-[#008bd0] outline-none">
+        </div>
+        <div class="grid grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-500 mb-1">Harga (Rp)</label>
+            <input type="number" id="inputPrice" required class="w-full px-4 py-2 border-2 border-sky-200 rounded-xl focus:border-[#008bd0] outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500 mb-1">Stok</label>
+            <input type="number" id="inputStock" required class="w-full px-4 py-2 border-2 border-sky-200 rounded-xl focus:border-[#008bd0] outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500 mb-1">Min. Beli</label>
+            <input type="number" id="inputMin" required class="w-full px-4 py-2 border-2 border-sky-200 rounded-xl focus:border-[#008bd0] outline-none">
+          </div>
+        </div>
+        <div class="bg-sky-50 p-4 rounded-xl border border-sky-200 flex justify-between items-center">
+          <p class="font-bold text-slate-700">Layanan Bukti (Foto/Video)?</p>
+          <input type="checkbox" id="inputProof" class="w-5 h-5 accent-[#008bd0] rounded">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-500 mb-1">Deskripsi & Ketentuan Trade</label>
+          <textarea id="inputDesc" rows="3" required class="w-full px-4 py-2 border-2 border-sky-200 rounded-xl focus:border-[#008bd0] outline-none"></textarea>
+        </div>
+        <div class="flex justify-end gap-3 pt-4">
+          <button type="button" onclick="closeFormModal()" class="px-5 py-2.5 bg-slate-100 rounded-xl font-bold">Batal</button>
+          <button type="submit" class="px-6 py-2.5 bg-[#008bd0] text-white font-bold rounded-xl shadow-md">Simpan Item</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= WIDGET CHAT ================= -->
+  <div id="chatWidget" class="fixed bottom-6 right-6 z-[60] flex flex-col items-end hidden">
+    <div id="chatBox" class="bg-white rounded-3xl shadow-2xl border border-sky-200 w-80 h-[450px] mb-4 flex flex-col overflow-hidden">
+      <div class="bg-[#008bd0] p-4 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-xl">👤</div>
+          <h3 class="font-bold text-white text-sm" id="chatSellerName">ProTrader_99</h3>
+        </div>
+        <button onclick="toggleChat()" class="text-white text-2xl leading-none">&times;</button>
+      </div>
+      <div id="chatMessages" class="flex-1 p-4 bg-slate-50 overflow-y-auto space-y-3 flex flex-col">
+        <div class="self-start bg-white border border-sky-100 text-slate-700 text-xs px-4 py-2 rounded-2xl rounded-tl-sm chat-message">
+          Halo! Ada yang bisa dibantu?
+        </div>
+      </div>
+      <div class="p-3 bg-white border-t border-sky-100 flex gap-2">
+        <input type="text" id="chatInput" placeholder="Ketik pesan..." class="flex-1 bg-slate-100 px-4 py-2 rounded-xl text-xs outline-none" onkeypress="if(event.key === 'Enter') sendChatMessage()">
+        <button onclick="sendChatMessage()" class="bg-[#008bd0] text-white px-4 py-2 rounded-xl">➤</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= JAVASCRIPT ================= -->
+  <script>
+    // DATA
+    let products = [
+      { id: 1, name: "Awakened Divine Orb", game: "Path of Exile", category: "Currency", price: 8500, stock: 250, minBuy: 10, providesProof: true, seller: "ProTrader_99", popular: true, desc: "• Trade via Party Face-to-Face\n• League: Settlers Softcore\n• Sertakan item sampah di trade window.", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQU5-f4XmMfqzcSNM7GUNI4QnuVOydGTU2EUGZW1LWXaQ&s=10" },
+      { id: 2, name: "AK-47 | Redline (Field-Tested)", game: "CS:GO / CS2", category: "Weapon", price: 210000, stock: 5, minBuy: 1, providesProof: true, seller: "ProTrader_99", popular: true, desc: "• Dikirim via Steam Trade Offer Instant 24 Jam.", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6ANVtf4iBpRDh3vYSUocnzRq331htT3fa4uG29mNBdQ&s" },
+      { id: 3, name: "Dragonclaw Hook", game: "Dota 2", category: "Skin", price: 2450000, stock: 2, minBuy: 1, providesProof: false, seller: "ProTrader_99", popular: true, desc: "• Clean item, no gems. Direct Steam Trade.", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSw3m9aMdlbwZPzpcO8Q4j9ulkSRzXNNeJAWwMYc0YmRQ&s=10" },
+      { id: 4, name: "1.000.000 Gold", game: "World of Warcraft", category: "Currency", price: 150000, stock: 20, minBuy: 1, providesProof: false, seller: "GamerGold_ID", popular: false, desc: "• Transaksi via In-Game Mail / Face-to-Face Guild Bank.", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQqStMhtwmJA9q9AVanKhSi0dOLwjaEvQ2OjHlQdt6HOQ&s=10" }
+    ];
+
+    let myOrders = [
+      { id: "ORD-9912", product: products[1], qty: 1, total: 210000, status: "Sedang Dikirim", date: "4 Okt 2026" },
+      { id: "ORD-9905", product: products[2], qty: 1, total: 2450000, status: "Selesai", date: "1 Okt 2026" }
+    ];
+
+    let selectedProduct = null, selectedQty = 1, currentTotal = 0;
+
+    // SPA Navigasi
+    function navigateTo(pageId) {
+      document.querySelectorAll('.page-section').forEach(sec => sec.classList.add('hidden'));
+      document.getElementById(pageId).classList.remove('hidden');
+      window.scrollTo(0, 0);
+
+      if (pageId === 'page-home') renderHomeProducts();
+      if (pageId === 'page-orders') renderOrders('Semua');
+      if (pageId === 'page-seller') renderSellerTable();
+    }
+
+    // HOME PAGE
+    function renderHomeProducts(items = products) {
+      const pList = document.getElementById('popularList'), iList = document.getElementById('itemList');
+      pList.innerHTML = ''; iList.innerHTML = '';
+      
+      items.forEach(item => {
+        const card = `
+          <div class="bg-white/80 rounded-3xl border-2 border-sky-100 hover:border-[#008bd0] overflow-hidden shadow-sm hover:shadow-xl cursor-pointer group" onclick="openProductDetail(${item.id})">
+            <div class="h-40 w-full overflow-hidden bg-sky-50 relative">
+              <img src="${item.image}" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
+              <span class="absolute top-3 right-3 bg-white/90 text-[10px] px-3 py-1 rounded-lg font-bold">${item.category}</span>
+            </div>
+            <div class="p-5">
+              <span class="text-[11px] text-[#008bd0] font-black uppercase tracking-wider">${item.game}</span>
+              <h3 class="font-bold text-slate-800 line-clamp-1">${item.name}</h3>
+              <div class="mt-4 border-t-2 border-sky-100 pt-4 flex justify-between items-end">
+                <span class="text-[11px] text-slate-400 font-bold">Min: ${item.minBuy}</span>
+                <span class="text-[#008bd0] font-black text-lg">Rp ${item.price.toLocaleString('id-ID')}</span>
+              </div>
+            </div>
+          </div>`;
+        if (item.popular) pList.innerHTML += card;
+        iList.innerHTML += card;
+      });
+    }
+
+    function searchItems() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      const cat = document.getElementById('categoryFilter').value;
+      renderHomeProducts(products.filter(p => (p.name.toLowerCase().includes(q) || p.game.toLowerCase().includes(q)) && (cat === 'ALL' || p.category === cat)));
+    }
+
+    // DETAIL & PAYMENT
+    function openProductDetail(id) {
+      selectedProduct = products.find(p => p.id === id);
+      document.getElementById('detailImage').src = selectedProduct.image;
+      document.getElementById('detailName').innerText = selectedProduct.name;
+      document.getElementById('detailSeller').innerText = selectedProduct.seller;
+      document.getElementById('detailPrice').innerText = `Rp ${selectedProduct.price.toLocaleString('id-ID')}`;
+      document.getElementById('detailMinBuy').innerText = selectedProduct.minBuy;
+      document.getElementById('detailStock').innerText = selectedProduct.stock;
+      
+      document.getElementById('detailDesc').innerText = selectedProduct.desc || "Tidak ada deskripsi tambahan.";
+      
+      const qtyInput = document.getElementById('quantityInput');
+      qtyInput.min = selectedProduct.minBuy;
+      qtyInput.max = selectedProduct.stock;
+      qtyInput.value = selectedProduct.minBuy;
+      updateDetailTotal();
+      navigateTo('page-detail');
+    }
+
+    function updateDetailTotal() {
+      let val = parseInt(document.getElementById('quantityInput').value) || 0;
+      if (val < selectedProduct.minBuy) val = selectedProduct.minBuy;
+      if (val > selectedProduct.stock) val = selectedProduct.stock;
+      selectedQty = val;
+      currentTotal = val * selectedProduct.price;
+      document.getElementById('detailTotalPrice').innerText = `Rp ${currentTotal.toLocaleString('id-ID')}`;
+    }
+
+    function goToPayment() {
+      document.getElementById('summaryImage').src = selectedProduct.image;
+      document.getElementById('summaryName').innerText = selectedProduct.name;
+      document.getElementById('summaryQty').innerText = `${selectedQty} Unit`;
+      
+      const toggle = document.getElementById('proofToggle');
+      toggle.checked = false;
+      toggle.disabled = !selectedProduct.providesProof;
+      document.getElementById('proofNotice').classList.toggle('hidden', selectedProduct.providesProof);
+      
+      renderPaymentSummary();
+      navigateTo('page-payment');
+    }
+
+    function renderPaymentSummary() {
+      const isProof = document.getElementById('proofToggle').checked && selectedProduct.providesProof;
+      const proofFee = isProof ? Math.round(currentTotal * 0.05) : 0; 
+      
+      // Mengisi id yang sebelumnya terlewat di HTML
+      document.getElementById('summarySubtotal').innerText = `Rp ${currentTotal.toLocaleString('id-ID')}`;
+      document.getElementById('summaryProof').innerText = `Rp ${proofFee.toLocaleString('id-ID')}`;
+      document.getElementById('summaryGrandTotal').innerText = `Rp ${(currentTotal + proofFee + 1000).toLocaleString('id-ID')}`;
+    }
+
+    function finishOrder() {
+      if (!document.getElementById('payNickname').value.trim()) return alert("Isi Nickname dulu!");
+      myOrders.unshift({
+        id: "ORD-" + Math.floor(1000 + Math.random() * 9000),
+        product: selectedProduct,
+        qty: selectedQty,
+        total: currentTotal,
+        status: "Sedang Dikirim",
+        date: "Hari Ini"
+      });
+      alert("✅ Pembayaran Berhasil!");
+      navigateTo('page-orders');
+    }
+
+    // ORDER LIST 
+    function renderOrders(filterStatus = 'Semua') {
+      document.querySelectorAll('.order-filter').forEach(btn => {
+        btn.className = (btn.innerText === filterStatus) 
+          ? "px-5 py-2 rounded-xl text-sm font-bold bg-[#008bd0] text-white shadow-md order-filter" 
+          : "px-5 py-2 rounded-xl text-sm font-bold bg-white text-slate-600 hover:bg-sky-50 shadow-sm order-filter";
+      });
+
+      const container = document.getElementById('orderListContainer');
+      container.innerHTML = '';
+      const filtered = filterStatus === 'Semua' ? myOrders : myOrders.filter(o => o.status === filterStatus);
+
+      if (filtered.length === 0) return container.innerHTML = `<div class="text-center p-8 bg-white/50 rounded-3xl text-slate-500 font-medium">Belum ada pesanan di kategori ini.</div>`;
+
+      filtered.forEach(order => {
+        let actionBtn = order.status === "Sedang Dikirim" 
+          ? `<button onclick="confirmOrder('${order.id}')" class="bg-emerald-500 text-white font-bold py-2 px-4 rounded-xl text-sm shadow-md">✅ Konfirmasi Terima</button>`
+          : `<button onclick="openProductDetail(${order.product.id})" class="bg-sky-100 text-[#008bd0] font-bold py-2 px-4 rounded-xl text-sm">Beli Lagi</button>`;
+
+        container.innerHTML += `
+          <div class="bg-white/90 p-5 rounded-3xl border border-sky-200 shadow-lg flex flex-col gap-4">
+            <div class="flex justify-between items-center border-b border-sky-100 pb-3">
+              <span class="text-xs font-bold text-slate-500">${order.date}</span>
+              <span class="text-xs font-bold px-3 py-1 rounded-lg ${order.status === 'Selesai' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">${order.status}</span>
+            </div>
+            <div class="flex items-center gap-4 cursor-pointer" onclick="openProductDetail(${order.product.id})">
+              <img src="${order.product.image}" class="w-16 h-16 rounded-xl object-cover">
+              <div class="flex-1">
+                <h3 class="font-bold text-slate-800">${order.product.name}</h3>
+                <p class="text-xs text-slate-500">${order.qty} x Rp ${order.product.price.toLocaleString('id-ID')}</p>
+              </div>
+              <p class="font-black text-[#008bd0]">Rp ${order.total.toLocaleString('id-ID')}</p>
+            </div>
+            <div class="flex justify-end gap-3 pt-3 border-t border-sky-100">
+              <button onclick="openChat('${order.product.seller}')" class="px-4 py-2 border-2 border-sky-200 rounded-xl text-sm font-bold text-slate-600">💬 Chat</button>
+              ${actionBtn}
+            </div>
+          </div>`;
+      });
+    }
+
+    function confirmOrder(id) {
+      if(confirm("Selesaikan pesanan ini?")) {
+        myOrders.find(o => o.id === id).status = "Selesai";
+        renderOrders('Semua');
+      }
+    }
+
+    // SELLER DASHBOARD
+    function renderSellerTable() {
+      const tbody = document.getElementById('sellerTableBody');
+      tbody.innerHTML = '';
+      products.forEach(item => {
+        tbody.innerHTML += `
+          <tr class="hover:bg-sky-50 transition-colors">
+            <td class="p-4 flex items-center gap-3">
+              <img src="${item.image}" class="w-10 h-10 rounded-lg object-cover">
+              <div>
+                <p class="font-bold text-slate-800 text-sm">${item.name}</p>
+                <span class="text-[10px] text-slate-400">${item.game}</span>
+              </div>
+            </td>
+            <td class="p-4 font-bold text-slate-800">Rp ${item.price.toLocaleString()}</td>
+            <td class="p-4">${item.stock}</td>
+            <td class="p-4">${item.minBuy}</td>
+            <td class="p-4">${item.providesProof ? 'Ya' : 'Tidak'}</td>
+            <td class="p-4 text-center">
+              <button onclick="editSellerItem(${item.id})" class="text-xs bg-amber-500 px-3 py-1.5 rounded-lg text-white font-bold mr-1">Edit</button>
+              <button onclick="deleteSellerItem(${item.id})" class="text-xs bg-rose-500 px-3 py-1.5 rounded-lg text-white font-bold">Hapus</button>
+            </td>
+          </tr>`;
+      });
+    }
+
+    function openFormModal() {
+      document.getElementById('productModal').classList.remove('hidden');
+    }
+
+    function closeFormModal() {
+      document.getElementById('productModal').classList.add('hidden');
+      document.querySelector('form').reset();
+      document.getElementById('inputEditId').value = '';
+    }
+
+    function saveSellerItem(e) {
+      e.preventDefault();
+      const editId = document.getElementById('inputEditId').value;
+      const data = {
+        id: editId ? parseInt(editId) : Date.now(),
+        image: document.getElementById('inputImage').value,
+        name: document.getElementById('inputName').value,
+        game: document.getElementById('inputGame').value,
+        category: document.getElementById('inputCategory').value,
+        price: parseInt(document.getElementById('inputPrice').value),
+        stock: parseInt(document.getElementById('inputStock').value),
+        minBuy: parseInt(document.getElementById('inputMin').value),
+        providesProof: document.getElementById('inputProof').checked,
+        desc: document.getElementById('inputDesc').value,
+        seller: "ProTrader_99", popular: false
+      };
+
+      if (editId) {
+        const idx = products.findIndex(p => p.id === parseInt(editId));
+        if (idx !== -1) products[idx] = { ...products[idx], ...data };
+      } else {
+        products.push(data);
+      }
+      renderSellerTable();
+      closeFormModal();
+    }
+
+    function editSellerItem(id) {
+      const item = products.find(p => p.id === id);
+      document.getElementById('inputEditId').value = item.id;
+      document.getElementById('inputImage').value = item.image;
+      document.getElementById('inputGame').value = item.game;
+      document.getElementById('inputCategory').value = item.category;
+      document.getElementById('inputName').value = item.name;
+      document.getElementById('inputPrice').value = item.price;
+      document.getElementById('inputStock').value = item.stock;
+      document.getElementById('inputMin').value = item.minBuy;
+      document.getElementById('inputProof').checked = item.providesProof;
+      document.getElementById('inputDesc').value = item.desc;
+      openFormModal();
+    }
+
+    function deleteSellerItem(id) {
+      if (confirm("Hapus item?")) {
+        products = products.filter(p => p.id !== id);
+        renderSellerTable();
+      }
+    }
+
+    // CHAT WIDGET
+    function openChatFromDetail() { openChat(selectedProduct.seller); }
+    function openChat(name) {
+      document.getElementById('chatSellerName').innerText = name;
+      document.getElementById('chatWidget').classList.remove('hidden');
+    }
+    function toggleChat() { document.getElementById('chatWidget').classList.add('hidden'); }
+    function sendChatMessage() {
+      const input = document.getElementById('chatInput');
+      if(!input.value.trim()) return;
+      document.getElementById('chatMessages').innerHTML += `<div class="self-end bg-[#008bd0] text-white text-xs px-4 py-2 rounded-2xl rounded-tr-sm">${input.value}</div>`;
+      input.value = '';
+    }
+
+    // INIT
+    navigateTo('page-home');
+  </script>
+</body>
+</html>
