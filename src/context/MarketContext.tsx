@@ -43,6 +43,7 @@ export type ChatMessage = {
 type MarketContextValue = {
   user: { username: string } | null;
   setUser: React.Dispatch<React.SetStateAction<{ username: string } | null>>;
+  userLoaded: boolean;
   products: Product[];
   setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
   productStorageError: string | null;
@@ -79,6 +80,7 @@ const initialOrders: Order[] = [
 
 const PRODUCTS_STORAGE_KEY = 'vexel-products';
 const ORDERS_STORAGE_KEY = 'vexel-orders';
+const USER_STORAGE_KEY = 'vexel-user';
 const previousDefaultImages: Record<number, string[]> = {
   1: [
     'https://placehold.co/400x300/008bd0/ffffff',
@@ -126,7 +128,8 @@ const isOrder = (value: unknown): value is Order => {
 export const MarketContext = createContext<MarketContextValue | null>(null);
 
 export const MarketProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<{ username: string } | null>({ username: 'ProTrader_99' });
+  const [user, setUser] = useState<{ username: string } | null>(null);
+  const [userLoaded, setUserLoaded] = useState(false);
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [productsLoaded, setProductsLoaded] = useState(false);
   const [productStorageError, setProductStorageError] = useState<string | null>(null);
@@ -136,6 +139,43 @@ export const MarketProvider = ({ children }: { children: ReactNode }) => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [selectedQty, setSelectedQty] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState<string>('');
+
+  useEffect(() => {
+    try {
+      const storedUser = window.localStorage.getItem(USER_STORAGE_KEY);
+      if (storedUser) {
+        const parsedUser: unknown = JSON.parse(storedUser);
+        if (
+          typeof parsedUser === 'object' &&
+          parsedUser !== null &&
+          'username' in parsedUser &&
+          typeof parsedUser.username === 'string' &&
+          parsedUser.username.trim()
+        ) {
+          setUser({ username: parsedUser.username });
+        } else {
+          throw new Error('Data sesi tersimpan tidak valid.');
+        }
+      }
+    } catch (error) {
+      console.error('Gagal memuat sesi pengguna.', error);
+    } finally {
+      setUserLoaded(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!userLoaded) return;
+    try {
+      if (user) {
+        window.localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+      } else {
+        window.localStorage.removeItem(USER_STORAGE_KEY);
+      }
+    } catch (error) {
+      console.error('Gagal menyimpan sesi pengguna.', error);
+    }
+  }, [user, userLoaded]);
 
   useEffect(() => {
     try {
@@ -220,6 +260,7 @@ export const MarketProvider = ({ children }: { children: ReactNode }) => {
       value={{
         user,
         setUser,
+        userLoaded,
         products,
         setProducts,
         productStorageError,

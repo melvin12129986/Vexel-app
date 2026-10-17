@@ -1,6 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { useMarket } from '@/context/MarketContext';
+import SessionActions from '@/components/auth/SessionActions';
 
 export default function Navbar() {
   const { searchQuery, setSearchQuery } = useMarket();
@@ -24,15 +25,16 @@ export default function Navbar() {
           </Link>
           
           {/* Mobile Buttons */}
-          <div className="flex gap-2 md:hidden">
-            <Link href="/chat" aria-label="Chat" className="rounded-xl bg-white/20 px-3 py-2 text-xs font-semibold text-white hover:bg-white/30">
-              💬
+          <div className="flex items-center gap-1.5 md:hidden">
+            <SessionActions />
+            <Link href="/chat" aria-label="Chat" title="Chat" className="grid h-10 w-10 place-items-center rounded-xl text-white transition hover:bg-white/15">
+              <ChatIcon />
             </Link>
-            <Link href="/orders" className="text-xs bg-white/20 hover:bg-white/30 text-white font-semibold px-3 py-2 rounded-xl backdrop-blur-sm">
-              📦
+            <Link href="/orders" aria-label="Pesanan" title="Pesanan saya" className="grid h-10 w-10 place-items-center rounded-xl text-white transition hover:bg-white/15">
+              <OrdersIcon />
             </Link>
-            <Link href="/seller" className="text-xs bg-white/20 hover:bg-white/30 text-white font-semibold px-3 py-2 rounded-xl backdrop-blur-sm">
-              Penjual
+            <Link href="/seller" aria-label="Panel penjual" title="Panel penjual" className="grid h-10 w-10 place-items-center rounded-xl text-white transition hover:bg-white/15">
+              <StoreIcon />
             </Link>
           </div>
         </div>
@@ -49,22 +51,50 @@ export default function Navbar() {
         </div>
 
         {/* Desktop Buttons */}
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-2">
           <Link href="/" className="rounded-xl px-3 py-2.5 text-sm font-semibold text-white/90 transition hover:bg-white/10 hover:text-white">
             Katalog
           </Link>
-          <Link href="/chat" className="text-sm bg-white/10 hover:bg-white/20 text-white font-semibold px-4 py-2.5 rounded-xl backdrop-blur-sm transition-all flex items-center gap-2">
-            💬 Chat
+          <Link href="/chat" aria-label="Chat" title="Chat" className="grid h-11 w-11 place-items-center rounded-xl text-white transition hover:bg-white/15">
+            <ChatIcon />
           </Link>
-          <Link href="/orders" className="text-sm bg-white/20 hover:bg-white/30 text-white font-semibold px-4 py-2.5 rounded-xl backdrop-blur-sm transition-all flex items-center gap-2">
-            📦 Pesanan Saya
+          <Link href="/orders" aria-label="Pesanan saya" title="Pesanan saya" className="grid h-11 w-11 place-items-center rounded-xl text-white transition hover:bg-white/15">
+            <OrdersIcon />
           </Link>
-          <Link href="/seller" className="text-sm bg-amber-400 hover:bg-amber-500 text-slate-900 font-bold px-5 py-2.5 rounded-xl backdrop-blur-sm transition-all">
-            Mulai Jualan
+          <Link href="/seller" aria-label="Panel penjual" title="Panel penjual" className="grid h-11 w-11 place-items-center rounded-xl text-white transition hover:bg-white/15">
+            <StoreIcon />
           </Link>
+          <SessionActions />
         </div>
 
       </div>
     </nav>
+  );
+}
+
+function ChatIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5 8 8 0 0 1-3.7-.9L4 19l1-4.1a7.5 7.5 0 1 1 15-3.4Z" />
+      <path d="M8.5 11.5h.01M12 11.5h.01M15.5 11.5h.01" strokeWidth="2.5" />
+    </svg>
+  );
+}
+
+function OrdersIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M7 3.75h7l4 4v12.5H7a2 2 0 0 1-2-2v-12a2.5 2.5 0 0 1 2-2.5Z" />
+      <path d="M14 4v4h4M9 12h6M9 16h6" />
+    </svg>
+  );
+}
+
+function StoreIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 10v10h16V10M3 10l2-6h14l2 6" />
+      <path d="M3 10a3 3 0 0 0 5 2.2A3 3 0 0 0 12 12a3 3 0 0 0 4 0 3 3 0 0 0 5-2M9 20v-5h6v5" />
+    </svg>
   );
 }

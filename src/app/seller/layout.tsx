@@ -1,4 +1,5 @@
 import SellerNavigation from '@/components/seller/SellerNavigation';
+import SessionActions from '@/components/auth/SessionActions';
 
 export default function SellerLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -19,6 +20,7 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
             <span className="grid h-9 w-9 place-items-center rounded-full bg-amber-100 text-lg" aria-hidden="true">🎮</span>
             <span className="hidden sm:inline">Kembali ke market</span>
           </a>
+          <SessionActions tone="light" />
         </div>
       </header>
       <div className="mx-auto flex min-h-[calc(100vh-72px)] max-w-[1600px]">

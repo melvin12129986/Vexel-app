@@ -15,11 +15,16 @@ export default function PaymentPage() {
   const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
 
   const existingOrderId = searchParams.get('orderId');
-  const existingOrder = orders.find((order) => order.id === existingOrderId);
+  const existingOrder = orders.find((order) =>
+    order.id === existingOrderId &&
+    order.product.id === Number(id) &&
+    order.buyer === user?.username &&
+    order.status === 'Menunggu Pembayaran'
+  );
   const product = existingOrder?.product ?? products.find((p: any) => p.id === Number(id));
 
   useEffect(() => {
-    if (existingOrder && existingOrder.product.id === Number(id) && existingOrder.status === 'Menunggu Pembayaran') {
+    if (existingOrder) {
       setCheckoutQty(existingOrder.qty);
       setWantsProof(existingOrder.wantsProof);
       setPendingOrderId(existingOrder.id);
