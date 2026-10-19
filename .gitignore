@@ -5,5 +5,4 @@ out/
 build/
 *.tsbuildinfo
 .env*
-!.env.example
 supabase/
