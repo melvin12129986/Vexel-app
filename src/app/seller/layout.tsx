@@ -6,7 +6,11 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
     <div className="min-h-screen bg-[#f4f5f7] text-slate-800">
       <header className="sticky top-0 z-40 flex h-[72px] items-center justify-between border-b border-slate-200 bg-white px-4 shadow-sm sm:px-8">
         <a href="/seller" className="flex items-center gap-2.5" aria-label="Vexel Seller Center">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#008bd0] text-lg font-black text-white">V</span>
+          <img
+            src="/vexel-logo.png"
+            alt="Vexel Logo"
+            className="h-9 w-9 rounded-xl object-cover shadow-sm"
+          />
           <span className="leading-tight">
             <span className="block text-xl font-black tracking-tight text-[#087cc1]">vexel</span>
             <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">seller center</span>

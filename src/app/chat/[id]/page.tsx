@@ -3,11 +3,14 @@ import { useMarket } from '@/context/MarketContext';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
+import axiosClient from '@/lib/axiosClient';
 
 export default function OrderChatPage() {
   const { id } = useParams<{ id: string }>();
   const { orders, user, chatMessages, setChatMessages } = useMarket();
   const [messageText, setMessageText] = useState('');
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
   const order = orders.find((item) => item.id === id);
 
   if (!order) {
@@ -22,22 +25,36 @@ export default function OrderChatPage() {
   const messages = chatMessages.filter((message) => message.orderId === order.id);
   const otherParty = user?.username === order.buyer ? order.product.seller : order.buyer;
 
-  const sendMessage = (event: FormEvent<HTMLFormElement>) => {
+  const sendMessage = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const text = messageText.trim();
-    if (!text || !user) return;
+    if (!text || !user || sending) return;
 
-    setChatMessages((currentMessages) => [
-      ...currentMessages,
-      {
-        id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    setSending(true);
+    setSendError(null);
+
+    try {
+      const response = await axiosClient.post('/api/chat', {
         orderId: order.id,
-        sender: user.username,
-        text,
-        sentAt: new Date().toISOString()
+        text
+      });
+      const createdMessage = response.data?.message;
+      if (createdMessage) {
+        setChatMessages((currentMessages) => {
+          if (currentMessages.some((msg) => msg.id === createdMessage.id)) {
+            return currentMessages;
+          }
+          return [...currentMessages, createdMessage];
+        });
       }
-    ]);
-    setMessageText('');
+      setMessageText('');
+    } catch (error: any) {
+      setSendError(
+        error?.response?.data?.error || 'Gagal mengirim pesan. Silakan coba lagi.'
+      );
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -47,6 +64,12 @@ export default function OrderChatPage() {
         <h2 className="text-xl font-bold text-slate-800">Chat dengan {otherParty}</h2>
         <p className="text-sm text-slate-500">{order.product.name} • {order.id} • {order.status}</p>
       </header>
+
+      {sendError && (
+        <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-700">
+          {sendError}
+        </p>
+      )}
 
       <section className="flex min-h-72 flex-col gap-3 rounded-3xl border border-sky-200 bg-white/90 p-5 shadow-lg" aria-live="polite">
         {messages.length === 0 ? (
@@ -76,8 +99,12 @@ export default function OrderChatPage() {
           maxLength={1000}
           className="min-w-0 flex-1 rounded-xl border border-sky-200 px-4 py-3 outline-none focus:border-[#008bd0]"
         />
-        <button type="submit" disabled={!messageText.trim()} className="rounded-xl bg-[#008bd0] px-5 py-3 font-bold text-white disabled:cursor-not-allowed disabled:opacity-50">
-          Kirim
+        <button
+          type="submit"
+          disabled={!messageText.trim() || sending}
+          className="rounded-xl bg-[#008bd0] px-5 py-3 font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {sending ? 'Mengirim...' : 'Kirim'}
         </button>
       </form>
     </div>

@@ -57,7 +57,10 @@ export default function SellerHistoryPage() {
       .sort((a, b) => sortOrder === 'newest' ? b.id.localeCompare(a.id) : a.id.localeCompare(b.id));
   }, [activeTab, searchQuery, selectedGame, proofOnly, sortOrder, sellerOrders]);
 
-  const totalSales = tabOrders('complete').reduce((total, order) => total + order.total, 0);
+  const totalSales = tabOrders('complete').reduce(
+    (total, order) => total + (order.sellerEarning ?? order.subtotal + order.proofFee),
+    0
+  );
   const counts: Record<HistoryTab, number> = {
     process: tabOrders('process').length,
     shipped: tabOrders('shipped').length,
@@ -72,7 +75,7 @@ export default function SellerHistoryPage() {
     <section className="space-y-5">
       <div className="flex flex-col gap-4 rounded border border-blue-200 bg-blue-50 px-4 py-4 text-sm text-slate-700 sm:flex-row sm:items-center sm:justify-between sm:px-5">
         <p><span className="mr-2 text-blue-600" aria-hidden="true">ⓘ</span>Kelola dan pantau semua transaksi tokomu dari halaman ini.</p>
-        <span className="shrink-0 font-semibold text-[#2678d4]">Total penjualan selesai: Rp {totalSales.toLocaleString('id-ID')}</span>
+        <span className="shrink-0 font-semibold text-[#2678d4]">Total pendapatan bersih selesai: Rp {totalSales.toLocaleString('id-ID')}</span>
       </div>
       <div>
         <p className="text-xs font-bold uppercase tracking-[0.15em] text-[#087cc1]">Pesanan</p>

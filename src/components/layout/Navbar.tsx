@@ -14,9 +14,9 @@ export default function Navbar() {
         <div className="flex items-center justify-between w-full md:w-auto">
           <Link href="/" className="flex items-center gap-3 cursor-pointer group">
             <img 
-              src="https://placehold.co/100x100/ffffff/008bd0?text=V&font=Montserrat" 
+              src="/vexel-logo.png" 
               alt="Vexel Logo" 
-              className="h-11 w-11 rounded-xl shadow-md group-hover:scale-105 transition-transform" 
+              className="h-11 w-11 rounded-xl object-cover shadow-md group-hover:scale-105 transition-transform" 
             />
             <div>
               <h1 className="text-2xl font-bold text-[#f5ebe6] leading-none tracking-tight">Vexel</h1>

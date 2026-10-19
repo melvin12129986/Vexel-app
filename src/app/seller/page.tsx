@@ -8,7 +8,10 @@ export default function SellerDashboard() {
   const sellerOrders = orders.filter((order) => order.product.seller === user?.username);
   const activeOrders = sellerOrders.filter((order) => order.status !== 'Selesai' && order.status !== 'Menunggu Pembayaran');
   const completedOrders = sellerOrders.filter((order) => order.status === 'Selesai');
-  const totalSales = completedOrders.reduce((total, order) => total + order.total, 0);
+  const totalSales = completedOrders.reduce(
+    (total, order) => total + (order.sellerEarning ?? order.subtotal + order.proofFee),
+    0
+  );
   const stats = [
     { label: 'Barang aktif', value: sellerProducts.length, icon: '◇', detail: 'Kelola katalog tokomu', href: '/seller/items', tone: 'bg-sky-100 text-[#0073ad]' },
     { label: 'Pesanan aktif', value: activeOrders.length, icon: '▤', detail: 'Perlu diproses', href: '/seller/orders', tone: 'bg-amber-100 text-amber-700' },
@@ -43,9 +46,9 @@ export default function SellerDashboard() {
         </div>
         <div className="rounded-3xl bg-gradient-to-br from-slate-900 to-sky-900 p-6 text-white shadow-lg">
           <span className="text-3xl">💰</span>
-          <p className="mt-5 text-sm font-semibold text-sky-200">Nilai transaksi selesai</p>
+          <p className="mt-5 text-sm font-semibold text-sky-200">Pendapatan bersih selesai</p>
           <p className="mt-1 text-2xl font-black">Rp {totalSales.toLocaleString('id-ID')}</p>
-          <p className="mt-2 text-xs text-slate-300">Berdasarkan pesanan yang berstatus selesai.</p>
+          <p className="mt-2 text-xs text-slate-300">Harga base barang + biaya bukti 5% (di luar biaya layanan platform 4%).</p>
           <Link href="/seller/history" className="mt-5 inline-block text-sm font-bold text-sky-300 hover:text-white">Buka riwayat →</Link>
         </div>
       </section>
